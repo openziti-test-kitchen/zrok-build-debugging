@@ -71,7 +71,6 @@ code, pre {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100vh;
 }
 
 .fullscreen .row {
@@ -119,8 +118,13 @@ code, pre {
     margin-top: 25px;
 }
 
-#zrok-tou {
-    margin-top: 15px;
+.zrok-tou {
+    margin: 15px;
+    color: white;
+}
+
+.zrok-type {
+    font-family: 'Russo One', sans-serif;
 }
 
 #controls-row {
@@ -130,4 +134,9 @@ code, pre {
 
 #navbar {
     background: linear-gradient(180deg, #0E0238 0%, #231069 100%);
+}
+
+#zrok-message-row {
+    padding: 10px;
+    height: 50px;
 }

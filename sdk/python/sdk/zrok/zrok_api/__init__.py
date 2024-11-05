@@ -26,6 +26,7 @@ from zrok_api.configuration import Configuration
 # import models into sdk package
 from zrok_api.models.access_request import AccessRequest
 from zrok_api.models.access_response import AccessResponse
+from zrok_api.models.account_body import AccountBody
 from zrok_api.models.auth_user import AuthUser
 from zrok_api.models.change_password_request import ChangePasswordRequest
 from zrok_api.models.configuration import Configuration
@@ -41,6 +42,7 @@ from zrok_api.models.environments import Environments
 from zrok_api.models.error_message import ErrorMessage
 from zrok_api.models.frontend import Frontend
 from zrok_api.models.frontends import Frontends
+from zrok_api.models.grants_body import GrantsBody
 from zrok_api.models.identity_body import IdentityBody
 from zrok_api.models.inline_response200 import InlineResponse200
 from zrok_api.models.inline_response201 import InlineResponse201

@@ -11,6 +11,7 @@ model/accessResponse.ts
 model/authUser.ts
 model/changePasswordRequest.ts
 model/configuration.ts
+model/createAccountRequest.ts
 model/createFrontendRequest.ts
 model/createFrontendResponse.ts
 model/createIdentity201Response.ts
@@ -22,6 +23,7 @@ model/enableResponse.ts
 model/environment.ts
 model/environmentAndResources.ts
 model/frontend.ts
+model/grantsRequest.ts
 model/inviteRequest.ts
 model/inviteTokenGenerateRequest.ts
 model/loginRequest.ts

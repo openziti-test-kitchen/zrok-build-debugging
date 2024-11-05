@@ -24,22 +24,12 @@ jobs:
     steps:
     - uses: openziti/ziti-mattermost-action-py@main
       if: |
-        env.ZHOOK_URL != null
-        && !(
-          github.event_name == 'issue_comment'
-          && github.event.sender.login == 'vercel[bot]'
-          && (contains(github.event.comment.body, 'Building') || contains(github.event.comment.body, 'Ignored'))
-        )
-        && (
-          github.event_name != 'pull_request_review'
-          || (github.event_name == 'pull_request_review' && github.event.review.state == 'approved')
-        )
-      env:
-        ZHOOK_URL: ${{ secrets.ZHOOK_URL }}
+        github.repository_owner == 'openziti' 
+        && ((github.event_name != 'pull_request_review') 
+        || (github.event_name == 'pull_request_review' && github.event.review.state == 'approved'))
       with:
         zitiId: ${{ secrets.ZITI_MATTERMOST_IDENTITY }}
         webhookUrl: ${{ secrets.ZHOOK_URL }}
         eventJson: ${{ toJson(github.event) }}
         senderUsername: "GitHubZ"
         destChannel: "dev-notifications"
-

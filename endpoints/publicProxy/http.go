@@ -95,7 +95,7 @@ type zitiDialContext struct {
 
 func (c *zitiDialContext) Dial(_ context.Context, _ string, addr string) (net.Conn, error) {
 	shrToken := strings.Split(addr, ":")[0] // ignore :port (we get passed 'host:port')
-	conn, err := c.ctx.Dial(shrToken)
+	conn, err := c.ctx.DialWithOptions(shrToken, &ziti.DialOptions{ConnectTimeout: 30 * time.Second})
 	if err != nil {
 		return conn, err
 	}
@@ -158,15 +158,31 @@ func shareHandler(handler http.Handler, pcfg *Config, key []byte, ctx ziti.Conte
 		if shrToken != "" {
 			if svc, found := endpoints.GetRefreshedService(shrToken, ctx); found {
 				if cfg, found := svc.Config[sdk.ZrokProxyConfig]; found {
-					if pcfg.Interstitial {
-						if v, istlFound := cfg["interstitial"]; istlFound {
-							if istlEnabled, ok := v.(bool); ok && istlEnabled {
-								skip := r.Header.Get("skip_zrok_interstitial")
-								_, zrokOkErr := r.Cookie("zrok_interstitial")
-								if skip == "" && zrokOkErr != nil {
-									logrus.Debugf("forcing interstitial for '%v'", r.URL)
-									interstitialUi.WriteInterstitialAnnounce(w)
-									return
+					if r.Method != http.MethodOptions && (pcfg.Interstitial != nil && pcfg.Interstitial.Enabled) {
+						sendInterstitial := true
+						if len(pcfg.Interstitial.UserAgentPrefixes) > 0 {
+							ua := r.Header.Get("User-Agent")
+							matched := false
+							for _, prefix := range pcfg.Interstitial.UserAgentPrefixes {
+								if strings.HasPrefix(ua, prefix) {
+									matched = true
+									break
+								}
+							}
+							if !matched {
+								sendInterstitial = false
+							}
+						}
+						if sendInterstitial {
+							if v, istlFound := cfg["interstitial"]; istlFound {
+								if istlEnabled, ok := v.(bool); ok && istlEnabled {
+									skip := r.Header.Get("skip_zrok_interstitial")
+									_, zrokOkErr := r.Cookie("zrok_interstitial")
+									if skip == "" && zrokOkErr != nil {
+										logrus.Debugf("forcing interstitial for '%v'", r.URL)
+										interstitialUi.WriteInterstitialAnnounce(w, pcfg.Interstitial.HtmlPath)
+										return
+									}
 								}
 							}
 						}

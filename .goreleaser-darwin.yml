@@ -1,3 +1,4 @@
+version: 2
 builds:
   - id: zrok-amd64
     main: ./cmd/zrok
@@ -31,6 +32,6 @@ builds:
       post:
         - cmd: 'codesign -s "Developer ID Application: NetFoundry Inc" -v dist/zrok-arm64_darwin_arm64/zrok --options=runtime'
           output: true
-        - cmd: zip "dist/zrok-arm64_darwin_arm64/zrok.zip" dist/zrok-arm64_darwin_arm64/zrok
+        - cmd: zip "dist/zrok-arm64_darwin_arm64/zrok.zip" dist/zrok-arm64_darwin_arm64_8.0/zrok
         - cmd: xcrun notarytool submit "dist/zrok-arm64_darwin_arm64/zrok.zip" --apple-id {{ .Env.AC_USERNAME }} --password {{ .Env.AC_PASSWORD }} --team-id MN5S649TXM --wait
           output: true

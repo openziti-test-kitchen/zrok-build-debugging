@@ -5,6 +5,7 @@ export * from './accessResponse';
 export * from './authUser';
 export * from './changePasswordRequest';
 export * from './configuration';
+export * from './createAccountRequest';
 export * from './createFrontendRequest';
 export * from './createFrontendResponse';
 export * from './createIdentity201Response';
@@ -16,6 +17,7 @@ export * from './enableResponse';
 export * from './environment';
 export * from './environmentAndResources';
 export * from './frontend';
+export * from './grantsRequest';
 export * from './inviteRequest';
 export * from './inviteTokenGenerateRequest';
 export * from './loginRequest';
@@ -59,6 +61,7 @@ import { AccessResponse } from './accessResponse';
 import { AuthUser } from './authUser';
 import { ChangePasswordRequest } from './changePasswordRequest';
 import { Configuration } from './configuration';
+import { CreateAccountRequest } from './createAccountRequest';
 import { CreateFrontendRequest } from './createFrontendRequest';
 import { CreateFrontendResponse } from './createFrontendResponse';
 import { CreateIdentity201Response } from './createIdentity201Response';
@@ -70,6 +73,7 @@ import { EnableResponse } from './enableResponse';
 import { Environment } from './environment';
 import { EnvironmentAndResources } from './environmentAndResources';
 import { Frontend } from './frontend';
+import { GrantsRequest } from './grantsRequest';
 import { InviteRequest } from './inviteRequest';
 import { InviteTokenGenerateRequest } from './inviteTokenGenerateRequest';
 import { LoginRequest } from './loginRequest';
@@ -121,6 +125,7 @@ let typeMap: {[index: string]: any} = {
     "AuthUser": AuthUser,
     "ChangePasswordRequest": ChangePasswordRequest,
     "Configuration": Configuration,
+    "CreateAccountRequest": CreateAccountRequest,
     "CreateFrontendRequest": CreateFrontendRequest,
     "CreateFrontendResponse": CreateFrontendResponse,
     "CreateIdentity201Response": CreateIdentity201Response,
@@ -132,6 +137,7 @@ let typeMap: {[index: string]: any} = {
     "Environment": Environment,
     "EnvironmentAndResources": EnvironmentAndResources,
     "Frontend": Frontend,
+    "GrantsRequest": GrantsRequest,
     "InviteRequest": InviteRequest,
     "InviteTokenGenerateRequest": InviteTokenGenerateRequest,
     "LoginRequest": LoginRequest,

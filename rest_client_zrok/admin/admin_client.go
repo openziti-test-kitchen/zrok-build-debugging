@@ -30,11 +30,15 @@ type ClientOption func(*runtime.ClientOperation)
 
 // ClientService is the interface for Client methods
 type ClientService interface {
+	CreateAccount(params *CreateAccountParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*CreateAccountCreated, error)
+
 	CreateFrontend(params *CreateFrontendParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*CreateFrontendCreated, error)
 
 	CreateIdentity(params *CreateIdentityParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*CreateIdentityCreated, error)
 
 	DeleteFrontend(params *DeleteFrontendParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*DeleteFrontendOK, error)
+
+	Grants(params *GrantsParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GrantsOK, error)
 
 	InviteTokenGenerate(params *InviteTokenGenerateParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*InviteTokenGenerateCreated, error)
 
@@ -43,6 +47,45 @@ type ClientService interface {
 	UpdateFrontend(params *UpdateFrontendParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*UpdateFrontendOK, error)
 
 	SetTransport(transport runtime.ClientTransport)
+}
+
+/*
+CreateAccount create account API
+*/
+func (a *Client) CreateAccount(params *CreateAccountParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*CreateAccountCreated, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewCreateAccountParams()
+	}
+	op := &runtime.ClientOperation{
+		ID:                 "createAccount",
+		Method:             "POST",
+		PathPattern:        "/account",
+		ProducesMediaTypes: []string{"application/zrok.v1+json"},
+		ConsumesMediaTypes: []string{"application/zrok.v1+json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &CreateAccountReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*CreateAccountCreated)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for createAccount: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 /*
@@ -159,6 +202,45 @@ func (a *Client) DeleteFrontend(params *DeleteFrontendParams, authInfo runtime.C
 	// unexpected success response
 	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
 	msg := fmt.Sprintf("unexpected success response for deleteFrontend: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
+}
+
+/*
+Grants grants API
+*/
+func (a *Client) Grants(params *GrantsParams, authInfo runtime.ClientAuthInfoWriter, opts ...ClientOption) (*GrantsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGrantsParams()
+	}
+	op := &runtime.ClientOperation{
+		ID:                 "grants",
+		Method:             "POST",
+		PathPattern:        "/grants",
+		ProducesMediaTypes: []string{"application/zrok.v1+json"},
+		ConsumesMediaTypes: []string{"application/zrok.v1+json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &GrantsReader{formats: a.formats},
+		AuthInfo:           authInfo,
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	}
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	result, err := a.transport.Submit(op)
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*GrantsOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for grants: API contract not enforced by server. Client expected to get an error, but got: %T", result)
 	panic(msg)
 }
 

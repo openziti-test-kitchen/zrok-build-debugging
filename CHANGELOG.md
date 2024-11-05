@@ -1,10 +1,74 @@
 # CHANGELOG
 
+## v0.4.43
+
+CHANGE: Update `github.com/openziti/sdk-golang` to version `v0.23.44`. Remove old `github.com/openziti/fabric` dependency, instead pulling in the modern `github.com/openziti/ziti` dependency.
+
+FIX: Bypass interstitial page for HTTP `OPTIONS` method (https://github.com/openziti/zrok/issues/777)
+
+## v0.4.42
+
+CHANGE: Switch all `Dial` operations made into the OpenZiti overlay to use `DialWithOptions(..., &ziti.DialOptions{ConnectTimeout: 30 * time.Second})`, switching to a 30 second timeout from a 5 second default (https://github.com/openziti/zrok/issues/772)
+
+FIX: Removed the `--basic-auth` flag from `zrok share private` as this was ignored... even if `zrok access private` honored the `ziti.proxy.v1` config to ask for basic auth, it would still be easy to write a custom SDK client that ignored the basic auth and accessed the share directly; better to remove the option than to allow confusing usage (https://github.com/openziti/zrok/issues/770)
+
+FIX: always append common options like `--headless` and conditionally append `--verbose --insecure` if their respective env vars are set to when running in a service manager like systemd or Docker and wrapping the `zrok` command with the `zrok-share.bash` shell script (https://openziti.discourse.group/t/question-about-reserved-public-vs-temp-public-shares/3169)
+
+FIX: Correct registration page CSS to ensure that the entire form is visible
+
+## v0.4.41
+
+FIX: Fixed crash when invoking `zrok share reserved` with no arguments (https://github.com/openziti/zrok/issues/740)
+
+FIX: zrok-share.service on Linux failed to start with a private share in closed permission mode
+
+FIX: Update `gopkg.in/go-jose/go-jose.v2` to `v2.6.3` to fix vulnerability around compressed data (https://github.com/openziti/zrok/issues/761)
+
+## v0.4.40
+
+FEATURE: New endpoint for synchronizing grants for an account (https://github.com/openziti/zrok/pull/744). Useful for updating the `zrok.proxy.v1` config objects containing interstitial setting when the `skip_interstitial_grants` table has been updated.
+
+FIX: prune incorrect troubleshooting advice about listing Caddy's certificates
+
+## v0.4.39
+
+FEATURE: New API endpoint allowing direct creation of accounts in the zrok database. Requires an admin token (specified in the controller configuration yaml) for authentication. See the OpenAPI spec for details of the API endpoint. The `zrok admin create account` CLI was also updated to call the API endpoint, rather than directly operating on the underlying database (https://github.com/openziti/zrok/issues/734). The [Docker](https://github.com/openziti/zrok/pull/736) and [Kubernetes](https://github.com/openziti/helm-charts/pull/249) zrok instance deployments were adapted to the new CLI parameter shape.
+
+FEATURE: Support `html_path` directive in `interstitial` stanza of public frontend configuration to support using an external HTML file for the interstitial page (https://github.com/openziti/zrok/issues/716)
+
+FEATURE: `zrok access private` now includes a `--response-header` flag to add headers to the response for HTTP-based backends. Add flag multiple times to add multiple headers to the response. Expects `key:value` header definitions in this format: `--response-header "Access-Control-Allow-Origin: *"` (https://github.com/openziti/zrok/issues/522)
+
+CHANGE: Update `github.com/openziti/sdk-golang` (and related dependencies) to version `v0.23.40`.
+
+CHANGE: upgrade to ziti v1.1.7 CLI in zrok container image
+
+## v0.4.38
+
+FEATURE: Conditionally enable interstitial page based on `User-Agent` prefix list. See the [frontend configuration template](etc/frontend.yml) for details on the new configuration structure (https://github.com/openziti/zrok/issues/715) 
+
+CHANGE: The interstitial configuration has been modified from a simple `interstitial: <bool>` to a richer structure, but the config version has not been incremented; this feature has not been widely adopted yet. See the [frontend configuration template](etc/frontend.yml) for details on the new structure.
+
+CHANGE: The registration page where a new user's password is set now includes a required checkbox, asking them to acknowledge the terms and conditions presented above the checkbox (https://github.com/openziti/zrok/issues/669)
+
+FIX: The registration page where a new user's password is set now includes better styling of the error message `<div/>` to prevent the entire page from jumping when the message changes.
+
+## v0.4.37
+
+FIX: Fix for setting the `zrok_interstitial` cookie on Chrome-based browsers.
+
+FIX: Fix for `store.IsAccountGrantedSkipInterstitial` to respect the `deleted` flag.
+
+FIX: When an error occurs connecting to the proxied endpoint, the `proxy` backend should return HTTP status `502` (https://github.com/openziti/zrok/issues/703)
+
 ## v0.4.36
 
 FEATURE: New interstitial pages that can be enabled per-frontend, and disabled per-account (https://github.com/openziti/zrok/issues/704)
 
 CHANGE: Enable `"declaration": true` in `tsconfig.json` for Node SDK.
+
+FIX: build 32bit build for armhf to fix [the FPE issue](https://github.com/openziti/zrok/issues/654) and [the missing link issue](https://github.com/openziti/zrok/issues/642)
+
+CHANGE: add [cross-build instructions](./BUILD.md) (includes new snapshot build target `armel`)
 
 ## v0.4.35
 

@@ -58,6 +58,9 @@ func NewZrokAPI(spec *loads.Document) *ZrokAPI {
 		MetadataConfigurationHandler: metadata.ConfigurationHandlerFunc(func(params metadata.ConfigurationParams) middleware.Responder {
 			return middleware.NotImplemented("operation metadata.Configuration has not yet been implemented")
 		}),
+		AdminCreateAccountHandler: admin.CreateAccountHandlerFunc(func(params admin.CreateAccountParams, principal *rest_model_zrok.Principal) middleware.Responder {
+			return middleware.NotImplemented("operation admin.CreateAccount has not yet been implemented")
+		}),
 		AdminCreateFrontendHandler: admin.CreateFrontendHandlerFunc(func(params admin.CreateFrontendParams, principal *rest_model_zrok.Principal) middleware.Responder {
 			return middleware.NotImplemented("operation admin.CreateFrontend has not yet been implemented")
 		}),
@@ -93,6 +96,9 @@ func NewZrokAPI(spec *loads.Document) *ZrokAPI {
 		}),
 		MetadataGetShareMetricsHandler: metadata.GetShareMetricsHandlerFunc(func(params metadata.GetShareMetricsParams, principal *rest_model_zrok.Principal) middleware.Responder {
 			return middleware.NotImplemented("operation metadata.GetShareMetrics has not yet been implemented")
+		}),
+		AdminGrantsHandler: admin.GrantsHandlerFunc(func(params admin.GrantsParams, principal *rest_model_zrok.Principal) middleware.Responder {
+			return middleware.NotImplemented("operation admin.Grants has not yet been implemented")
 		}),
 		AccountInviteHandler: account.InviteHandlerFunc(func(params account.InviteParams) middleware.Responder {
 			return middleware.NotImplemented("operation account.Invite has not yet been implemented")
@@ -198,6 +204,8 @@ type ZrokAPI struct {
 	AccountChangePasswordHandler account.ChangePasswordHandler
 	// MetadataConfigurationHandler sets the operation handler for the configuration operation
 	MetadataConfigurationHandler metadata.ConfigurationHandler
+	// AdminCreateAccountHandler sets the operation handler for the create account operation
+	AdminCreateAccountHandler admin.CreateAccountHandler
 	// AdminCreateFrontendHandler sets the operation handler for the create frontend operation
 	AdminCreateFrontendHandler admin.CreateFrontendHandler
 	// AdminCreateIdentityHandler sets the operation handler for the create identity operation
@@ -222,6 +230,8 @@ type ZrokAPI struct {
 	MetadataGetShareDetailHandler metadata.GetShareDetailHandler
 	// MetadataGetShareMetricsHandler sets the operation handler for the get share metrics operation
 	MetadataGetShareMetricsHandler metadata.GetShareMetricsHandler
+	// AdminGrantsHandler sets the operation handler for the grants operation
+	AdminGrantsHandler admin.GrantsHandler
 	// AccountInviteHandler sets the operation handler for the invite operation
 	AccountInviteHandler account.InviteHandler
 	// AdminInviteTokenGenerateHandler sets the operation handler for the invite token generate operation
@@ -344,6 +354,9 @@ func (o *ZrokAPI) Validate() error {
 	if o.MetadataConfigurationHandler == nil {
 		unregistered = append(unregistered, "metadata.ConfigurationHandler")
 	}
+	if o.AdminCreateAccountHandler == nil {
+		unregistered = append(unregistered, "admin.CreateAccountHandler")
+	}
 	if o.AdminCreateFrontendHandler == nil {
 		unregistered = append(unregistered, "admin.CreateFrontendHandler")
 	}
@@ -379,6 +392,9 @@ func (o *ZrokAPI) Validate() error {
 	}
 	if o.MetadataGetShareMetricsHandler == nil {
 		unregistered = append(unregistered, "metadata.GetShareMetricsHandler")
+	}
+	if o.AdminGrantsHandler == nil {
+		unregistered = append(unregistered, "admin.GrantsHandler")
 	}
 	if o.AccountInviteHandler == nil {
 		unregistered = append(unregistered, "account.InviteHandler")
@@ -542,6 +558,10 @@ func (o *ZrokAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
+	o.handlers["POST"]["/account"] = admin.NewCreateAccount(o.context, o.AdminCreateAccountHandler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
 	o.handlers["POST"]["/frontend"] = admin.NewCreateFrontend(o.context, o.AdminCreateFrontendHandler)
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
@@ -587,6 +607,10 @@ func (o *ZrokAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/metrics/share/{shrToken}"] = metadata.NewGetShareMetrics(o.context, o.MetadataGetShareMetricsHandler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/grants"] = admin.NewGrants(o.context, o.AdminGrantsHandler)
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}

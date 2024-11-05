@@ -16,9 +16,15 @@ type Config struct {
 	Identity     string
 	Address      string
 	HostMatch    string
-	Interstitial bool
+	Interstitial *InterstitialConfig
 	Oauth        *OauthConfig
 	Tls          *endpoints.TlsConfig
+}
+
+type InterstitialConfig struct {
+	Enabled           bool
+	HtmlPath          string
+	UserAgentPrefixes []string
 }
 
 type OauthConfig struct {
@@ -46,9 +52,8 @@ type OauthProviderConfig struct {
 
 func DefaultConfig() *Config {
 	return &Config{
-		Identity:     "public",
-		Address:      "0.0.0.0:8080",
-		Interstitial: false,
+		Identity: "public",
+		Address:  "0.0.0.0:8080",
 	}
 }
 
