@@ -15,100 +15,8 @@ env:
   JFROG_CLI_VERSION: ${{ vars.JFROG_CLI_VERSION || '2.50.4' }}
 
 jobs:
-  build-darwin:
-    if: github.repository_owner == 'openziti' || vars.ZROK_SKIP_MACOS_BUILD == 'false'
-    runs-on: macos-14
-    steps:
-      - name: import distribution cert
-        uses: apple-actions/import-codesign-certs@v3
-        with:
-          p12-file-base64: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_P12_BASE64 }}
-          p12-password: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_PASSWORD }}
-
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - run: git fetch --force --tags
-
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: ./go.mod
-          cache: true
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 18.x
-
-      - run: npm install
-        working-directory: ui
-
-      - run: npm run build
-        working-directory: ui
-        env:
-          CI: "true"
-
-      - uses: goreleaser/goreleaser-action@v6
-        with:
-          distribution: goreleaser
-          version: '~> v2'
-          args: release --skip=publish --config .goreleaser-darwin.yml
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          AC_USERNAME: ${{ secrets.AC_USERNAME }}
-          AC_PASSWORD: ${{ secrets.AC_PASSWORD }}
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: release-builds-darwin
-          path: ./dist/*.gz
-
-  build-windows:
-    if: github.repository_owner == 'openziti' || vars.ZROK_SKIP_WINDOWS_BUILD == 'false'
-    runs-on: ubuntu-latest
-    steps:
-      - run: sudo apt update
-      - run: sudo apt-get install gcc-mingw-w64-x86-64
-
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - run: git fetch --force --tags
-
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: ./go.mod
-          cache: true
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 18.x
-
-      - run: npm install
-        working-directory: ui
-
-      - run: npm run build
-        working-directory: ui
-        env:
-          CI: "true"
-
-      - uses: goreleaser/goreleaser-action@v6
-        with:
-          distribution: goreleaser
-          version: '~> v2'
-          args: release --skip=publish --config .goreleaser-windows.yml
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: release-builds-windows
-          path: ./dist/*.gz
-
   build-linux:
     name: build-linux-${{ matrix.arch.goreleaser }}
-    needs: ["build-windows", "build-darwin"]  # linux-build can only succeed once because it uploads immutable distribution artifacts, so it must run only after the re-runnable build steps have succeeded
     runs-on: ubuntu-22.04  # oldest Docker host runner for broadest kernel, syscall, ABI support
     container: openziti/ziti-builder:v2  # v2 is based on ubuntu focal 20.04 for broadest glibc support
     strategy:
@@ -230,6 +138,97 @@ jobs:
               "${_debs[0]}" \
               ${{ env.ZITI_DEB_TEST_REPO }}/pool/${PAX}/${ARCH}/
           done
+
+  build-darwin:
+    if: github.repository_owner == 'openziti' || vars.ZROK_SKIP_MACOS_BUILD == 'false'
+    runs-on: macos-14
+    steps:
+      - name: import distribution cert
+        uses: apple-actions/import-codesign-certs@v3
+        with:
+          p12-file-base64: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_P12_BASE64 }}
+          p12-password: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_PASSWORD }}
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - run: git fetch --force --tags
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: ./go.mod
+          cache: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+
+      - run: npm install
+        working-directory: ui
+
+      - run: npm run build
+        working-directory: ui
+        env:
+          CI: "true"
+
+      - uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: '~> v2'
+          args: release --skip=publish --config .goreleaser-darwin.yml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AC_USERNAME: ${{ secrets.AC_USERNAME }}
+          AC_PASSWORD: ${{ secrets.AC_PASSWORD }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-builds-darwin
+          path: ./dist/*.gz
+
+  build-windows:
+    if: github.repository_owner == 'openziti' || vars.ZROK_SKIP_WINDOWS_BUILD == 'false'
+    runs-on: ubuntu-latest
+    steps:
+      - run: sudo apt update
+      - run: sudo apt-get install gcc-mingw-w64-x86-64
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - run: git fetch --force --tags
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: ./go.mod
+          cache: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+
+      - run: npm install
+        working-directory: ui
+
+      - run: npm run build
+        working-directory: ui
+        env:
+          CI: "true"
+
+      - uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: '~> v2'
+          args: release --skip=publish --config .goreleaser-windows.yml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-builds-windows
+          path: ./dist/*.gz
 
   call-publish-docker-images:
     name: Publish Release Docker Images
