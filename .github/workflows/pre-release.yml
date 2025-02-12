@@ -88,10 +88,16 @@ jobs:
           ARCH: ${{ matrix.arch.rpm }}
         run: |
           set -o xtrace
+          shopt -s nullglob
           for PAX in zrok{,-share}; do
-            _rpms=( ./dist/${PAX}-${GITHUB_REF_NAME#v}-*.${ARCH}.rpm )
+            _pattern="./dist/${PAX}-${GITHUB_REF_NAME#v}-*.${ARCH}.rpm"
+            if ! compgen -G "$_pattern" > /dev/null; then
+              echo "ERROR: No RPM files found matching pattern '${_pattern}'" >&2
+              exit 1
+            fi
+            _rpms=( "$_pattern" )
             if [[ ${#_rpms[@]} -ne 1 ]]; then
-              echo "ERROR: Failed to find exactly one RPM for ${PAX} architecture '${ARCH}': '${_rpms[@]}'" >&2
+              echo "ERROR: Failed to find exactly one RPM file, got: '${_rpms[@]}'" >&2
               exit 1
             fi
 
@@ -110,10 +116,16 @@ jobs:
           ARCH: ${{ matrix.arch.deb }}
         run: |
           set -o xtrace
+          shopt -s nullglob
           for PAX in zrok{,-share}; do
-            _debs=( ./dist/${PAX}_${GITHUB_REF_NAME#v}-*_${ARCH}.deb )
+            _pattern="./dist/${PAX}_${GITHUB_REF_NAME#v}-*_${ARCH}.deb"
+            if ! compgen -G "$_pattern" > /dev/null; then
+              echo "ERROR: No DEB files found matching pattern '${_pattern}'" >&2
+              exit 1
+            fi
+            _debs=( "$_pattern" )
             if [[ ${#_debs[@]} -ne 1 ]]; then
-              echo "ERROR: Failed to find exactly one DEB for ${PAX} architecture '${ARCH}': '${_debs[@]}'" >&2
+              echo "ERROR: Failed to match exactly one DEB file, got: '${_debs[@]}'" >&2
               exit 1
             fi
 
