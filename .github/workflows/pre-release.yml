@@ -16,6 +16,7 @@ env:
 
 jobs:
   build-linux:
+    name: build-linux-${{ matrix.arch.goreleaser }}
     runs-on: ubuntu-22.04  # oldest Docker host runner for broadest kernel, syscall, ABI support
     container: openziti/ziti-builder:v2  # v2 is based on ubuntu focal 20.04 for broadest glibc support
     strategy:
@@ -34,7 +35,7 @@ jobs:
             rpm: armv7hl
             gcc: gcc-arm-linux-gnueabihf
     steps:
-      # skipped because ziti-builder image already has the multi-arch, multi-lib build chain installed
+      # skipped because ziti-builder image provides the multi-arch, multi-lib build toolchain
       # - run: apt-get update
       # - run: apt-get --yes --quiet install ${{ matrix.arch.gcc }}
 
@@ -88,7 +89,7 @@ jobs:
         run: |
           set -o xtrace
           for PAX in zrok{,-share}; do
-            _rpms=( ./dist/${PAX}-${GITHUB_REF_NAME}-*.${ARCH}.rpm )
+            _rpms=( ./dist/${PAX}-${GITHUB_REF_NAME#v}-*.${ARCH}.rpm )
             if [[ ${#_rpms[@]} -ne 1 ]]; then
               echo "ERROR: Failed to find exactly one RPM for ${PAX} architecture '${ARCH}': '${_rpms[@]}'" >&2
               exit 1
@@ -110,7 +111,7 @@ jobs:
         run: |
           set -o xtrace
           for PAX in zrok{,-share}; do
-            _debs=( ./dist/${PAX}_${GITHUB_REF_NAME}-*_${ARCH}.deb )
+            _debs=( ./dist/${PAX}_${GITHUB_REF_NAME#v}-*_${ARCH}.deb )
             if [[ ${#_debs[@]} -ne 1 ]]; then
               echo "ERROR: Failed to find exactly one DEB for ${PAX} architecture '${ARCH}': '${_debs[@]}'" >&2
               exit 1
