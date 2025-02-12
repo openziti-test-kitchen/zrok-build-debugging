@@ -67,22 +67,35 @@ jobs:
       - name: Upload RPM to Artifactory pre-release repo
         shell: bash
         run: |
-          for RPM in ./dist/*.rpm; do
-            echo "INFO: Uploading $RPM"
+          set -o xtrace
+          for PAX in zrok{,-share}; do
+            _rpms=( ./dist/${PAX}-*.rpm )
+            if [[ ${#_rpms[@]} -ne 1 ]]; then
+              echo "ERROR: Failed to find exactly one RPM for ${PAX} architecture 'x86_64': '${_rpms[@]}'" >&2
+              exit 1
+            fi
+
+            echo "INFO: Uploading ${_rpms[0]}"
             jf rt upload --recursive=false --flat=true \
-              "$RPM" \
+              "${_rpms[0]}" \
               ${{ env.ZITI_RPM_TEST_REPO }}/redhat/x86_64/
           done
 
       - name: Upload DEB to Artifactory pre-release repo
         shell: bash
         run: |
-          for DEB in ./dist/*.deb; do
-            echo "INFO: Uploading $DEB"
+          set -o xtrace
+          for PAX in zrok{,-share}; do
+            _debs=( ./dist/${PAX}-*.deb )
+            if [[ ${#_debs[@]} -ne 1 ]]; then
+              echo "ERROR: Failed to find exactly one DEB for ${PAX} architecture 'x86_64': '${_debs[@]}'" >&2
+              exit 1
+            fi
+
+            echo "INFO: Uploading ${_debs[0]}"
             jf rt upload --recursive=false --flat=true \
-            --deb=debian/main/amd64 \
-            "$DEB" \
-            ${{ env.ZITI_DEB_TEST_REPO }}/pool/zrok/amd64/
+              "${_debs[0]}" \
+              ${{ env.ZITI_DEB_TEST_REPO }}/pool/${PAX}/amd64/
           done
 
   build-linux-arm64:
@@ -137,22 +150,35 @@ jobs:
       - name: Upload RPM to Artifactory pre-release repo
         shell: bash
         run: |
-          for RPM in ./dist/*.rpm; do
-            echo "INFO: Uploading $RPM"
+          set -o xtrace
+          for PAX in zrok{,-share}; do
+            _rpms=( ./dist/${PAX}-*.rpm )
+            if [[ ${#_rpms[@]} -ne 1 ]]; then
+              echo "ERROR: Failed to find exactly one RPM for ${PAX} architecture 'aarch64': '${_rpms[@]}'" >&2
+              exit 1
+            fi
+            echo "INFO: Uploading ${_rpms[0]}"
             jf rt upload --recursive=false --flat=true \
-              "$RPM" \
+              "${_rpms[0]}" \
               ${{ env.ZITI_RPM_TEST_REPO }}/redhat/aarch64/
           done
 
       - name: Upload DEB to Artifactory pre-release repo
         shell: bash
         run: |
-          for DEB in ./dist/*.deb; do
-            echo "INFO: Uploading $DEB"
+          set -o xtrace
+          for PAX in zrok{,-share}; do
+            _debs=( ./dist/${PAX}-*.deb )
+            if [[ ${#_debs[@]} -ne 1 ]]; then
+              echo "ERROR: Failed to find exactly one DEB for ${PAX} architecture 'arm64': '${_debs[@]}'" >&2
+              exit 1
+            fi
+
+            echo "INFO: Uploading ${_debs[0]}"
             jf rt upload --recursive=false --flat=true \
             --deb=debian/main/arm64 \
-            "$DEB" \
-            ${{ env.ZITI_DEB_TEST_REPO }}/pool/zrok/arm64/
+            "${_debs[0]}" \
+            ${{ env.ZITI_DEB_TEST_REPO }}/pool/${PAX}/arm64/
           done
 
   build-linux-arm:
@@ -207,22 +233,36 @@ jobs:
       - name: Upload RPM to Artifactory pre-release repo
         shell: bash
         run: |
-          for RPM in ./dist/*.rpm; do
-            echo "INFO: Uploading $RPM"
+          set -o xtrace
+          for PAX in zrok{,-share}; do
+            _rpms=( ./dist/${PAX}-*.rpm )
+            if [[ ${#_rpms[@]} -ne 1 ]]; then
+              echo "ERROR: Failed to find exactly one RPM for ${PAX} architecture 'armv7hl': '${_rpms[@]}'" >&2
+              exit 1
+            fi
+
+            echo "INFO: Uploading ${_rpms[0]}"
             jf rt upload --recursive=false --flat=true \
-              "$RPM" \
+              "${_rpms[0]}" \
               ${{ env.ZITI_RPM_TEST_REPO }}/redhat/armv7hl/
           done
 
       - name: Upload DEB to Artifactory pre-release repo
         shell: bash
         run: |
-          for DEB in ./dist/*.deb; do
-            echo "INFO: Uploading $DEB"
+          set -o xtrace
+          for PAX in zrok{,-share}; do
+            _debs=( ./dist/${PAX}-*.deb )
+            if [[ ${#_debs[@]} -ne 1 ]]; then
+              echo "ERROR: Failed to find exactly one DEB for ${PAX} architecture 'armhf': '${_debs[@]}'" >&2
+              exit 1
+            fi
+
+            echo "INFO: Uploading ${_debs[0]}"
             jf rt upload --recursive=false --flat=true \
-            --deb=debian/main/armhf \
-            "$DEB" \
-            ${{ env.ZITI_DEB_TEST_REPO }}/pool/zrok/armhf/
+              --deb=debian/main/armhf \
+              "${_debs[0]}" \
+              ${{ env.ZITI_DEB_TEST_REPO }}/pool/${PAX}/armhf/
           done
 
   build-darwin:
