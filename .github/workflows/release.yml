@@ -34,8 +34,8 @@ jobs:
             rpm: armv7hl
             gcc: gcc-arm-linux-gnueabihf
     steps:
-      - run: sudo apt update
-      - run: sudo apt-get install ${{ matrix.arch.gcc }}
+      - run: apt update
+      - run: apt-get install ${{ matrix.arch.gcc }}
 
       - uses: actions/checkout@v4
         with:
