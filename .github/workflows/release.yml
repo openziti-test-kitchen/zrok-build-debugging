@@ -232,8 +232,6 @@ jobs:
 
   call-publish-docker-images:
     name: Publish Release Docker Images
-    # allow skipped but not failed
-    if: ${{ !cancelled() && (needs.build-linux.result == 'success') && (needs.build-darwin.result == 'success' || needs.build-darwin.result == 'skipped') && (needs.build-windows.result == 'success' || needs.build-windows.result == 'skipped') }}
     needs:
       - build-linux
       - build-darwin
