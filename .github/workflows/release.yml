@@ -15,11 +15,27 @@ env:
   JFROG_CLI_VERSION: ${{ vars.JFROG_CLI_VERSION || '2.50.4' }}
 
 jobs:
-  build-linux-amd64:
-    runs-on: ubuntu-20.04
+  build-linux:
+    runs-on: ubuntu-22.04  # oldest Docker host runner for broadest kernel ABI support
+    container: openziti/ziti-builder:v2  # v2 is based on ubuntu focal 20.04
+    strategy:
+      matrix:
+        arch:
+          - goreleaser: amd64
+            deb: amd64
+            rpm: x86_64
+            gcc: gcc-multilib g++-multilib
+          - goreleaser: arm64
+            deb: arm64
+            rpm: aarch64
+            gcc: gcc-aarch64-linux-gnu
+          - goreleaser: arm
+            deb: armhf
+            rpm: armv7hl
+            gcc: gcc-arm-linux-gnueabihf
     steps:
       - run: sudo apt update
-      - run: sudo apt-get install gcc-multilib g++-multilib
+      - run: sudo apt-get install ${{ matrix.arch.gcc }}
 
       - uses: actions/checkout@v4
         with:
@@ -48,13 +64,13 @@ jobs:
         with:
           distribution: goreleaser
           version: '~> v2'
-          args: release --skip=publish --config .goreleaser-linux-amd64.yml
+          args: release --skip=publish --config .goreleaser-linux-${{ matrix.arch.goreleaser }}.yml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/upload-artifact@v4
         with:
-          name: release-builds-linux-amd64
+          name: release-builds-linux-${{ matrix.arch.goreleaser }}
           path: ./dist/*.gz
 
       - name: Configure jFrog CLI
@@ -67,18 +83,21 @@ jobs:
       - name: Upload RPM to Artifactory pre-release repo
         shell: bash
         env:
-          ARCH: x86_64
+          ARCH: ${{ matrix.arch.rpm }}
         run: |
           set -o xtrace
           for PAX in zrok{,-share}; do
-            _rpms=( ./dist/${PAX}-${GITHUB_REF_NAME}-1.${ARCH}.rpm )
+            _rpms=( ./dist/${PAX}-${GITHUB_REF_NAME}-*.${ARCH}.rpm )
             if [[ ${#_rpms[@]} -ne 1 ]]; then
               echo "ERROR: Failed to find exactly one RPM for ${PAX} architecture '${ARCH}': '${_rpms[@]}'" >&2
               exit 1
             fi
 
             echo "INFO: Uploading ${_rpms[0]}"
-            jf rt upload --recursive=false --flat=true \
+            jf rt upload \
+              --recursive=false \
+              --flat=true \
+              --fail-no-op=true \
               "${_rpms[0]}" \
               ${{ env.ZITI_RPM_TEST_REPO }}/redhat/${ARCH}/
           done
@@ -86,188 +105,24 @@ jobs:
       - name: Upload DEB to Artifactory pre-release repo
         shell: bash
         env:
-          GITHUB_REF_NAME: ${{ github.ref_name }}
-          ARCH: x86_64
+          ARCH: ${{ matrix.arch.deb }}
         run: |
           set -o xtrace
           for PAX in zrok{,-share}; do
-            _debs=( ./dist/${PAX}-${GITHUB_REF_NAME}-1.${ARCH}.deb )
+            _debs=( ./dist/${PAX}_${GITHUB_REF_NAME}-*_${ARCH}.deb )
             if [[ ${#_debs[@]} -ne 1 ]]; then
-              echo "ERROR: Failed to find exactly one DEB for ${PAX} architecture 'x86_64': '${_debs[@]}'" >&2
+              echo "ERROR: Failed to find exactly one DEB for ${PAX} architecture '${ARCH}': '${_debs[@]}'" >&2
               exit 1
             fi
 
             echo "INFO: Uploading ${_debs[0]}"
-            jf rt upload --recursive=false --flat=true \
+            jf rt upload \
+              --recursive=false \
+              --flat=true \
+              --fail-no-op=true \
+              --deb=debian/main/${ARCH} \
               "${_debs[0]}" \
-              ${{ env.ZITI_DEB_TEST_REPO }}/pool/${PAX}/amd64/
-          done
-
-  build-linux-arm64:
-    runs-on: ubuntu-20.04
-    steps:
-      - run: sudo apt update
-      - run: sudo apt-get install gcc-aarch64-linux-gnu
-
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - run: git fetch --force --tags
-
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: ./go.mod
-          cache: true
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 18.x
-
-      - run: npm install
-        working-directory: ui
-
-      - run: npm run build
-        working-directory: ui
-        env:
-          CI: "true"
-
-      - uses: goreleaser/goreleaser-action@v6
-        with:
-          distribution: goreleaser
-          version: '~> v2'
-          args: release --skip=publish --config .goreleaser-linux-arm64.yml
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: release-builds-linux-arm64
-          path: ./dist/*.gz
-
-      - name: Configure jFrog CLI
-        uses: jfrog/setup-jfrog-cli@v4
-        with:
-          version: ${{ env.JFROG_CLI_VERSION }}
-        env:
-          JF_ENV_1: ${{ secrets.ZITI_ARTIFACTORY_CLI_CONFIG_PACKAGE_UPLOAD }}
-
-      - name: Upload RPM to Artifactory pre-release repo
-        shell: bash
-        run: |
-          set -o xtrace
-          for PAX in zrok{,-share}; do
-            _rpms=( ./dist/${PAX}-*.rpm )
-            if [[ ${#_rpms[@]} -ne 1 ]]; then
-              echo "ERROR: Failed to find exactly one RPM for ${PAX} architecture 'aarch64': '${_rpms[@]}'" >&2
-              exit 1
-            fi
-            echo "INFO: Uploading ${_rpms[0]}"
-            jf rt upload --recursive=false --flat=true \
-              "${_rpms[0]}" \
-              ${{ env.ZITI_RPM_TEST_REPO }}/redhat/aarch64/
-          done
-
-      - name: Upload DEB to Artifactory pre-release repo
-        shell: bash
-        run: |
-          set -o xtrace
-          for PAX in zrok{,-share}; do
-            _debs=( ./dist/${PAX}-*.deb )
-            if [[ ${#_debs[@]} -ne 1 ]]; then
-              echo "ERROR: Failed to find exactly one DEB for ${PAX} architecture 'arm64': '${_debs[@]}'" >&2
-              exit 1
-            fi
-
-            echo "INFO: Uploading ${_debs[0]}"
-            jf rt upload --recursive=false --flat=true \
-            --deb=debian/main/arm64 \
-            "${_debs[0]}" \
-            ${{ env.ZITI_DEB_TEST_REPO }}/pool/${PAX}/arm64/
-          done
-
-  build-linux-arm:
-    runs-on: ubuntu-20.04
-    steps:
-      - run: sudo apt update
-      - run: sudo apt-get install gcc-arm-linux-gnueabihf
-
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - run: git fetch --force --tags
-
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: ./go.mod
-          cache: true
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 18.x
-
-      - run: npm install
-        working-directory: ui
-
-      - run: npm run build
-        working-directory: ui
-        env:
-          CI: "true"
-
-      - uses: goreleaser/goreleaser-action@v6
-        with:
-          distribution: goreleaser
-          version: '~> v2'
-          args: release --skip=publish --config .goreleaser-linux-armhf.yml
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: release-builds-linux-arm
-          path: ./dist/*.gz
-
-      - name: Configure jFrog CLI
-        uses: jfrog/setup-jfrog-cli@v4
-        with:
-          version: ${{ env.JFROG_CLI_VERSION }}
-        env:
-          JF_ENV_1: ${{ secrets.ZITI_ARTIFACTORY_CLI_CONFIG_PACKAGE_UPLOAD }}
-
-      - name: Upload RPM to Artifactory pre-release repo
-        shell: bash
-        run: |
-          set -o xtrace
-          for PAX in zrok{,-share}; do
-            _rpms=( ./dist/${PAX}-*.rpm )
-            if [[ ${#_rpms[@]} -ne 1 ]]; then
-              echo "ERROR: Failed to find exactly one RPM for ${PAX} architecture 'armv7hl': '${_rpms[@]}'" >&2
-              exit 1
-            fi
-
-            echo "INFO: Uploading ${_rpms[0]}"
-            jf rt upload --recursive=false --flat=true \
-              "${_rpms[0]}" \
-              ${{ env.ZITI_RPM_TEST_REPO }}/redhat/armv7hl/
-          done
-
-      - name: Upload DEB to Artifactory pre-release repo
-        shell: bash
-        run: |
-          set -o xtrace
-          for PAX in zrok{,-share}; do
-            _debs=( ./dist/${PAX}-*.deb )
-            if [[ ${#_debs[@]} -ne 1 ]]; then
-              echo "ERROR: Failed to find exactly one DEB for ${PAX} architecture 'armhf': '${_debs[@]}'" >&2
-              exit 1
-            fi
-
-            echo "INFO: Uploading ${_debs[0]}"
-            jf rt upload --recursive=false --flat=true \
-              --deb=debian/main/armhf \
-              "${_debs[0]}" \
-              ${{ env.ZITI_DEB_TEST_REPO }}/pool/${PAX}/armhf/
+              ${{ env.ZITI_DEB_TEST_REPO }}/pool/${PAX}/${ARCH}/
           done
 
   build-darwin:
@@ -364,18 +219,9 @@ jobs:
   call-publish-docker-images:
     name: Publish Release Docker Images
     # allow skipped but not failed
-    if: ${{
-          !cancelled()
-          && (needs.build-linux-amd64.result == 'success')
-          && (needs.build-linux-arm.result   == 'success')
-          && (needs.build-linux-arm64.result == 'success')
-          && (needs.build-darwin.result      == 'success' || needs.build-darwin.result      == 'skipped')
-          && (needs.build-windows.result     == 'success' || needs.build-windows.result     == 'skipped')
-      }}
+    if: ${{ !cancelled() && (needs.build-linux.result == 'success') && (needs.build-darwin.result == 'success' || needs.build-darwin.result == 'skipped') && (needs.build-windows.result == 'success' || needs.build-windows.result == 'skipped') }}
     needs:
-      - build-linux-amd64
-      - build-linux-arm
-      - build-linux-arm64
+      - build-linux
       - build-darwin
       - build-windows
     uses: ./.github/workflows/publish-docker-images.yml
