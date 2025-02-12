@@ -115,6 +115,7 @@ jobs:
           jf rt copy
           --recursive=false
           --flat=true
+          --fail-no-op=true
           ${{ env.ZITI_RPM_TEST_REPO }}/redhat/${{ matrix.arch.rpm }}/${{ matrix.package_name }}-${{ needs.parse_version.outputs.version }}-1.${{ matrix.arch.rpm }}.rpm
           ${{ env.ZITI_RPM_PROD_REPO }}/redhat/${{ matrix.arch.rpm }}/
 
@@ -125,5 +126,6 @@ jobs:
           jf rt copy
           --recursive=false
           --flat=true
+          --fail-no-op=true
           ${{ env.ZITI_DEB_TEST_REPO }}/pool/${{ matrix.package_name }}/${{ matrix.arch.deb }}/${{ matrix.package_name }}_${{ needs.parse_version.outputs.version }}-1_${{ matrix.arch.deb }}.deb
           ${{ env.ZITI_DEB_PROD_REPO }}/pool/${{ matrix.package_name }}/${{ matrix.arch.deb }}/
