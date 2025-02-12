@@ -316,8 +316,7 @@ jobs:
           name: release-builds-windows
           path: ./dist/*.gz
 
-  call-publish-docker-images:
-    name: Publish Release Docker Images
+  publish-release:
     # allow skipped but not failed
     if: ${{
           !cancelled()
@@ -333,13 +332,6 @@ jobs:
       - build-linux-arm64
       - build-darwin
       - build-windows
-    uses: ./.github/workflows/publish-docker-images.yml
-    secrets: inherit
-    with:
-      zrok-version: ${{ github.ref_name }}
-
-  publish-release:
-    needs: call-publish-docker-images
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -364,3 +356,11 @@ jobs:
           args: release --config .goreleaser-release.yml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  call-publish-docker-images:
+    name: Publish Release Docker Images
+    needs: publish-release
+    uses: ./.github/workflows/publish-docker-images.yml
+    secrets: inherit
+    with:
+      zrok-version: ${{ github.ref_name }}
