@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.4.49
+
+FIX: Pre-releases are no longer uploaded to the stable Linux package repo.
+
+CHANGE: Pre-releases are uploaded to the pre-release Linux package repo and Docker Hub for testing. [RELEASING.md](./RELEASING.md) describes releaser steps and the events they trigger.
+
 ## v0.4.48
 
 FIX: the Python SDK erroneously assumed the enabled zrok environment contained a config.json file, and was changed to only load it if the file was present (https://github.com/openziti/zrok/pull/853/).
