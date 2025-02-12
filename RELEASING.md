@@ -4,14 +4,16 @@
 ## Manual Steps
 
 1. Create a semver Git tag on main starting with a 'v' character.
-1. Push the tag to GitHub.
-1. Wait for automated steps to complete.
-1. In GitHub Releases, edit the draft release as needed and finalize.
+1. Push the release tag to GitHub like `v*.*.*`.
+    1. Linux packages are uploaded to Artifactory as pre-releases.
+    1. Docker images are uploaded to Docker Hub as pre-releases.
+    1. A release is drafted in GitHub.
+1. Edit the draft release as needed and finalize as a pre-release.
+1. Edit the pre-release to mark it as a stable release (`isPrerelease: false`). Marking it as "latest" has no side effect.
+    1. The one-time GitHub "released" event fires.
+    1. Linux packages are promoted to "stable" in Artifactory.
+    1. Docker images are promoted to `:latest` in Docker Hub.
 
-## Automated Steps
+## Rolling Back Downstreams
 
-1. The Release workflow is triggered by creating the Git tag and
-    1. uploads Linux packages to Artifactory and
-    1. drafts a release in GitHub Releases.
-1. The Publish Container Images workflow is triggered by the Release event and
-    1. pushes Docker images to Docker Hub.
+The concepts, tools, and procedures for managing existing downstream artifacts in Artifactory and Docker Hub are identical for zrok and ziti. Here's the [RELEASING.md document for ziti](https://github.com/openziti/ziti/blob/main/RELEASING.md#rolling-back-downstreams).

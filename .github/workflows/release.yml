@@ -66,27 +66,32 @@ jobs:
 
       - name: Upload RPM to Artifactory pre-release repo
         shell: bash
+        env:
+          ARCH: x86_64
         run: |
           set -o xtrace
           for PAX in zrok{,-share}; do
-            _rpms=( ./dist/${PAX}-*.rpm )
+            _rpms=( ./dist/${PAX}-${GITHUB_REF_NAME}-1.${ARCH}.rpm )
             if [[ ${#_rpms[@]} -ne 1 ]]; then
-              echo "ERROR: Failed to find exactly one RPM for ${PAX} architecture 'x86_64': '${_rpms[@]}'" >&2
+              echo "ERROR: Failed to find exactly one RPM for ${PAX} architecture '${ARCH}': '${_rpms[@]}'" >&2
               exit 1
             fi
 
             echo "INFO: Uploading ${_rpms[0]}"
             jf rt upload --recursive=false --flat=true \
               "${_rpms[0]}" \
-              ${{ env.ZITI_RPM_TEST_REPO }}/redhat/x86_64/
+              ${{ env.ZITI_RPM_TEST_REPO }}/redhat/${ARCH}/
           done
 
       - name: Upload DEB to Artifactory pre-release repo
         shell: bash
+        env:
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+          ARCH: x86_64
         run: |
           set -o xtrace
           for PAX in zrok{,-share}; do
-            _debs=( ./dist/${PAX}-*.deb )
+            _debs=( ./dist/${PAX}-${GITHUB_REF_NAME}-1.${ARCH}.deb )
             if [[ ${#_debs[@]} -ne 1 ]]; then
               echo "ERROR: Failed to find exactly one DEB for ${PAX} architecture 'x86_64': '${_debs[@]}'" >&2
               exit 1

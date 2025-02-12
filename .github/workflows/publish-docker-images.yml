@@ -12,7 +12,7 @@ jobs:
   publish-docker-images:
     runs-on: ubuntu-24.04
     env:
-      RELEASE_REF: ${{ inputs.zrok-version || github.ref_name }}
+      RELEASE_REF: ${{ inputs.zrok-version }}
     steps:
       # compose the semver string without leading "refs/tags" or "v" so we can predict the
       # release artifact filename
