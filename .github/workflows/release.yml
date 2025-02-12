@@ -363,4 +363,4 @@ jobs:
     uses: ./.github/workflows/publish-docker-images.yml
     secrets: inherit
     with:
-      ziti-tag: ${{ github.ref_name }}
+      zrok-version: ${{ github.ref_name }}
