@@ -211,7 +211,7 @@ jobs:
             echo "INFO: Uploading $RPM"
             jf rt upload --recursive=false --flat=true \
               "$RPM" \
-              ${{ env.ZITI_RPM_TEST_REPO }}/redhat/armv7/
+              ${{ env.ZITI_RPM_TEST_REPO }}/redhat/armv7hl/
           done
 
       - name: Upload DEB to Artifactory pre-release repo
@@ -220,9 +220,9 @@ jobs:
           for DEB in ./dist/*.deb; do
             echo "INFO: Uploading $DEB"
             jf rt upload --recursive=false --flat=true \
-            --deb=debian/main/armv7 \
+            --deb=debian/main/armhf \
             "$DEB" \
-            ${{ env.ZITI_DEB_TEST_REPO }}/pool/zrok/armv7/
+            ${{ env.ZITI_DEB_TEST_REPO }}/pool/zrok/armhf/
           done
 
   build-darwin:

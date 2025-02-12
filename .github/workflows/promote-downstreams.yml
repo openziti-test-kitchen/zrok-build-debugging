@@ -91,8 +91,8 @@ jobs:
             rpm: x86_64
           - deb: arm64
             rpm: aarch64
-          - deb: armv7
-            rpm: armv7
+          - deb: armhf
+            rpm: armv7hl
         packager:
           - rpm
           - deb
@@ -115,7 +115,7 @@ jobs:
           jf rt copy
           --recursive=false
           --flat=true
-          ${{ env.ZITI_RPM_TEST_REPO }}/redhat/${{ matrix.arch.rpm }}/${{ matrix.package_name }}-${{ needs.parse_version.outputs.version }}.${{ matrix.arch.rpm }}.rpm
+          ${{ env.ZITI_RPM_TEST_REPO }}/redhat/${{ matrix.arch.rpm }}/${{ matrix.package_name }}-${{ needs.parse_version.outputs.version }}-1.${{ matrix.arch.rpm }}.rpm
           ${{ env.ZITI_RPM_PROD_REPO }}/redhat/${{ matrix.arch.rpm }}/
 
       - name: Copy DEB from test repo to stable repo with jFrog CLI
@@ -125,5 +125,5 @@ jobs:
           jf rt copy
           --recursive=false
           --flat=true
-          ${{ env.ZITI_DEB_TEST_REPO }}/pool/${{ matrix.package_name }}/${{ matrix.arch.deb }}/${{ matrix.package_name }}_${{ needs.parse_version.outputs.version }}_${{ matrix.arch.deb }}.deb
+          ${{ env.ZITI_DEB_TEST_REPO }}/pool/${{ matrix.package_name }}/${{ matrix.arch.deb }}/${{ matrix.package_name }}_${{ needs.parse_version.outputs.version }}-1_${{ matrix.arch.deb }}.deb
           ${{ env.ZITI_DEB_PROD_REPO }}/pool/${{ matrix.package_name }}/${{ matrix.arch.deb }}/
