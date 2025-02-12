@@ -10,8 +10,8 @@ permissions:
   contents: write
 
 env:
-  ZITI_DEB_PROD_REPO: ${{ vars.ZITI_DEB_PROD_REPO || 'zitipax-openziti-deb-stable' }}
-  ZITI_RPM_PROD_REPO: ${{ vars.ZITI_RPM_PROD_REPO || 'zitipax-openziti-rpm-stable' }}
+  ZITI_DEB_TEST_REPO: ${{ vars.ZITI_DEB_TEST_REPO || 'zitipax-openziti-deb-test' }}
+  ZITI_RPM_TEST_REPO: ${{ vars.ZITI_RPM_TEST_REPO || 'zitipax-openziti-rpm-test' }}
   JFROG_CLI_VERSION: ${{ vars.JFROG_CLI_VERSION || '2.50.4' }}
 
 jobs:
@@ -64,17 +64,17 @@ jobs:
         env:
           JF_ENV_1: ${{ secrets.ZITI_ARTIFACTORY_CLI_CONFIG_PACKAGE_UPLOAD }}
 
-      - name: Upload RPM to Artifactory release repo
+      - name: Upload RPM to Artifactory pre-release repo
         shell: bash
         run: |
           for RPM in ./dist/*.rpm; do
             echo "INFO: Uploading $RPM"
             jf rt upload --recursive=false --flat=true \
               "$RPM" \
-              ${{ env.ZITI_RPM_PROD_REPO }}/redhat/x86_64/
+              ${{ env.ZITI_RPM_TEST_REPO }}/redhat/x86_64/
           done
 
-      - name: Upload DEB to Artifactory release repo
+      - name: Upload DEB to Artifactory pre-release repo
         shell: bash
         run: |
           for DEB in ./dist/*.deb; do
@@ -82,7 +82,7 @@ jobs:
             jf rt upload --recursive=false --flat=true \
             --deb=debian/main/amd64 \
             "$DEB" \
-            ${{ env.ZITI_DEB_PROD_REPO }}/pool/zrok/amd64/
+            ${{ env.ZITI_DEB_TEST_REPO }}/pool/zrok/amd64/
           done
 
   build-linux-arm64:
@@ -134,17 +134,17 @@ jobs:
         env:
           JF_ENV_1: ${{ secrets.ZITI_ARTIFACTORY_CLI_CONFIG_PACKAGE_UPLOAD }}
 
-      - name: Upload RPM to Artifactory release repo
+      - name: Upload RPM to Artifactory pre-release repo
         shell: bash
         run: |
           for RPM in ./dist/*.rpm; do
             echo "INFO: Uploading $RPM"
             jf rt upload --recursive=false --flat=true \
               "$RPM" \
-              ${{ env.ZITI_RPM_PROD_REPO }}/redhat/aarch64/
+              ${{ env.ZITI_RPM_TEST_REPO }}/redhat/aarch64/
           done
 
-      - name: Upload DEB to Artifactory release repo
+      - name: Upload DEB to Artifactory pre-release repo
         shell: bash
         run: |
           for DEB in ./dist/*.deb; do
@@ -152,7 +152,7 @@ jobs:
             jf rt upload --recursive=false --flat=true \
             --deb=debian/main/arm64 \
             "$DEB" \
-            ${{ env.ZITI_DEB_PROD_REPO }}/pool/zrok/arm64/
+            ${{ env.ZITI_DEB_TEST_REPO }}/pool/zrok/arm64/
           done
 
   build-linux-arm:
@@ -204,17 +204,17 @@ jobs:
         env:
           JF_ENV_1: ${{ secrets.ZITI_ARTIFACTORY_CLI_CONFIG_PACKAGE_UPLOAD }}
 
-      - name: Upload RPM to Artifactory release repo
+      - name: Upload RPM to Artifactory pre-release repo
         shell: bash
         run: |
           for RPM in ./dist/*.rpm; do
             echo "INFO: Uploading $RPM"
             jf rt upload --recursive=false --flat=true \
               "$RPM" \
-              ${{ env.ZITI_RPM_PROD_REPO }}/redhat/armv7/
+              ${{ env.ZITI_RPM_TEST_REPO }}/redhat/armv7/
           done
 
-      - name: Upload DEB to Artifactory release repo
+      - name: Upload DEB to Artifactory pre-release repo
         shell: bash
         run: |
           for DEB in ./dist/*.deb; do
@@ -222,7 +222,7 @@ jobs:
             jf rt upload --recursive=false --flat=true \
             --deb=debian/main/armv7 \
             "$DEB" \
-            ${{ env.ZITI_DEB_PROD_REPO }}/pool/zrok/armv7/
+            ${{ env.ZITI_DEB_TEST_REPO }}/pool/zrok/armv7/
           done
 
   build-darwin:
@@ -356,3 +356,11 @@ jobs:
           args: release --config .goreleaser-release.yml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  call-publish-docker-images:
+    name: Publish Release Docker Images
+    needs: publish-release
+    uses: ./.github/workflows/publish-docker-images.yml
+    secrets: inherit
+    with:
+      ziti-tag: ${{ github.ref_name }}
