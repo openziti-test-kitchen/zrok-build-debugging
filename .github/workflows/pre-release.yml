@@ -1,4 +1,4 @@
-name: Release
+name: Pre-Release
 
 on:
   push:
@@ -16,15 +16,15 @@ env:
 
 jobs:
   build-linux:
-    runs-on: ubuntu-22.04  # oldest Docker host runner for broadest kernel ABI support
-    container: openziti/ziti-builder:v2  # v2 is based on ubuntu focal 20.04
+    runs-on: ubuntu-22.04  # oldest Docker host runner for broadest kernel, syscall, ABI support
+    container: openziti/ziti-builder:v2  # v2 is based on ubuntu focal 20.04 for broadest glibc support
     strategy:
       matrix:
         arch:
           - goreleaser: amd64
             deb: amd64
             rpm: x86_64
-            gcc: gcc-multilib g++-multilib
+            gcc: gcc g++
           - goreleaser: arm64
             deb: arm64
             rpm: aarch64
@@ -34,8 +34,9 @@ jobs:
             rpm: armv7hl
             gcc: gcc-arm-linux-gnueabihf
     steps:
-      - run: apt update
-      - run: apt-get install ${{ matrix.arch.gcc }}
+      # skipped because ziti-builder image already has the multi-arch, multi-lib build chain installed
+      # - run: apt-get update
+      # - run: apt-get --yes --quiet install ${{ matrix.arch.gcc }}
 
       - uses: actions/checkout@v4
         with:
