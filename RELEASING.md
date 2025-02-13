@@ -20,7 +20,7 @@
     1. Python wheels are built and released to PyPi.
     1. Node.js packages are built and released to NPM.
 1. Edit the stable release to mark it as latest.
-    1. https://docs.zrok.io/docs/guides/install/ always serve the "latest" stable version via GitHub binary download URLs.
+    1. https://docs.zrok.io/docs/guides/install/ always serves the "latest" stable version via GitHub binary download URLs.
 
 ## Rolling Back Downstreams
 
