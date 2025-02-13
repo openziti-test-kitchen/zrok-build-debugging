@@ -93,7 +93,7 @@ jobs:
           set -o xtrace
           shopt -s nullglob
           for PAX in zrok{,-share}; do
-            _pattern="./dist/${PAX}-${GITHUB_REF_NAME#v}-*.${ARCH}.rpm"
+            _pattern="./dist/${PAX}-${GITHUB_REF_NAME#v}*.${ARCH}.rpm"
             if ! compgen -G "$_pattern" > /dev/null; then
               echo "ERROR: No RPM files found matching pattern '${_pattern}'" >&2
               ls -1 ./dist/
@@ -122,7 +122,7 @@ jobs:
           set -o xtrace
           shopt -s nullglob
           for PAX in zrok{,-share}; do
-            _pattern="./dist/${PAX}_${GITHUB_REF_NAME#v}-*_${ARCH}.deb"
+            _pattern="./dist/${PAX}_${GITHUB_REF_NAME#v}*_${ARCH}.deb"
             if ! compgen -G "$_pattern" > /dev/null; then
               echo "ERROR: No DEB files found matching pattern '${_pattern}'" >&2
               ls -1 ./dist/
