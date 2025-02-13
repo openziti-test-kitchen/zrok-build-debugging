@@ -92,8 +92,11 @@ jobs:
         run: |
           set -o xtrace
           shopt -s nullglob
+          SEMVER=${GITHUB_REF_NAME#v}
+          SEMVER_CORE=${SEMVER%%-*}
+          SEMVER_PRE=${SEMVER#*-}
           for PAX in zrok{,-share}; do
-            _pattern="./dist/${PAX}-${GITHUB_REF_NAME#v}*.${ARCH}.rpm"
+            _pattern="./dist/${PAX}-${SEMVER_CORE}${SEMVER_PRE:+~${SEMVER_PRE}}*.${ARCH}.rpm"
             if ! compgen -G "$_pattern" > /dev/null; then
               echo "ERROR: No RPM files found matching pattern '${_pattern}'" >&2
               ls -1 ./dist/
@@ -121,8 +124,11 @@ jobs:
         run: |
           set -o xtrace
           shopt -s nullglob
+          SEMVER=${GITHUB_REF_NAME#v}
+          SEMVER_CORE=${SEMVER%%-*}
+          SEMVER_PRE=${SEMVER#*-}
           for PAX in zrok{,-share}; do
-            _pattern="./dist/${PAX}_${GITHUB_REF_NAME#v}*_${ARCH}.deb"
+            _pattern="./dist/${PAX}-${SEMVER_CORE}${SEMVER_PRE:+~${SEMVER_PRE}}*_${ARCH}.deb"
             if ! compgen -G "$_pattern" > /dev/null; then
               echo "ERROR: No DEB files found matching pattern '${_pattern}'" >&2
               ls -1 ./dist/
