@@ -10,6 +10,7 @@ jobs:
 
   enforce_stable_semver:
     name: Require Stable Release Semver
+    if: github.event.action == 'released'
     runs-on: ubuntu-24.04
     outputs:
       version: ${{ steps.parse.outputs.version }}
