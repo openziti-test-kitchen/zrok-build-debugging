@@ -5,7 +5,7 @@
 
 This project uses semantic versioning. See [here](https://semver.org/) for more information. Release tags like `v3.2.1` are eligible for promotion to stable status in GitHub and downstream distribution channels. Pre-release tags like `v3.2.1-alpha.1` (with a semver hyphenated pre-release suffix) are published in GitHub as pre-releases, and are blocked from promotion to downstream distribution channels if they are marked "stable" by mistake and the GitHub "released" event fires.
 
-## Manual Steps
+## How to Trigger Release Automation
 
 > [!NOTE]
 > Each trigger is outlined separately, but some may occur simultaneously, e.g., when a draft release is published as stable rather than first publishing it as a pre-release, or a pre-release is promoted to stable and marked as latest at the same time.
