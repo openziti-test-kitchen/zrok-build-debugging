@@ -94,7 +94,11 @@ jobs:
           shopt -s nullglob
           SEMVER=${GITHUB_REF_NAME#v}
           SEMVER_CORE=${SEMVER%%-*}
-          SEMVER_PRE=${SEMVER#*-}
+          if [[ "$SEMVER_CORE" == ${SEMVER#*-} ]]; then
+            SEMVER_PRE=""  # no semver pre-release suffix
+          else
+            SEMVER_PRE=${SEMVER#*-}
+          fi
           for PAX in zrok{,-share}; do
             _pattern="./dist/${PAX}-${SEMVER_CORE}${SEMVER_PRE:+~${SEMVER_PRE}}*.${ARCH}.rpm"
             if ! compgen -G "$_pattern" > /dev/null; then
@@ -126,7 +130,11 @@ jobs:
           shopt -s nullglob
           SEMVER=${GITHUB_REF_NAME#v}
           SEMVER_CORE=${SEMVER%%-*}
-          SEMVER_PRE=${SEMVER#*-}
+          if [[ "$SEMVER_CORE" == ${SEMVER#*-} ]]; then
+            SEMVER_PRE=""  # no semver pre-release suffix
+          else
+            SEMVER_PRE=${SEMVER#*-}
+          fi
           for PAX in zrok{,-share}; do
             _pattern="./dist/${PAX}-${SEMVER_CORE}${SEMVER_PRE:+~${SEMVER_PRE}}*_${ARCH}.deb"
             if ! compgen -G "$_pattern" > /dev/null; then
