@@ -136,7 +136,7 @@ jobs:
             SEMVER_PRE=${SEMVER#*-}
           fi
           for PAX in zrok{,-share}; do
-            _pattern="./dist/${PAX}-${SEMVER_CORE}${SEMVER_PRE:+~${SEMVER_PRE}}*_${ARCH}.deb"
+            _pattern="./dist/${PAX}_${SEMVER_CORE}${SEMVER_PRE:+~${SEMVER_PRE}}*_${ARCH}.deb"
             if ! compgen -G "$_pattern" > /dev/null; then
               echo "ERROR: No DEB files found matching pattern '${_pattern}'" >&2
               ls -1 ./dist/
