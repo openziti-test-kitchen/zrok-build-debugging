@@ -96,6 +96,7 @@ jobs:
             _pattern="./dist/${PAX}-${GITHUB_REF_NAME#v}-*.${ARCH}.rpm"
             if ! compgen -G "$_pattern" > /dev/null; then
               echo "ERROR: No RPM files found matching pattern '${_pattern}'" >&2
+              ls -1 ./dist/
               exit 1
             fi
             _rpms=( $_pattern )
@@ -124,6 +125,7 @@ jobs:
             _pattern="./dist/${PAX}_${GITHUB_REF_NAME#v}-*_${ARCH}.deb"
             if ! compgen -G "$_pattern" > /dev/null; then
               echo "ERROR: No DEB files found matching pattern '${_pattern}'" >&2
+              ls -1 ./dist/
               exit 1
             fi
             _debs=( $_pattern )
