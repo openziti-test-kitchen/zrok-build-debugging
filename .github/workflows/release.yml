@@ -61,8 +61,6 @@ jobs:
         env:
           CI: "true"
 
-      - run: git status
-
       - run: npm install
         working-directory: agent/agentUi
 
@@ -70,8 +68,6 @@ jobs:
         working-directory: agent/agentUi
         env:
           CI: "true"
-
-      - run: git status
 
       - uses: goreleaser/goreleaser-action@v6
         with:
@@ -191,6 +187,8 @@ jobs:
         with:
           node-version: 20.x
 
+      - run: git status
+
       - run: npm install
         working-directory: ui
 
@@ -199,6 +197,8 @@ jobs:
         env:
           CI: "true"
 
+      - run: git status
+
       - run: npm install
         working-directory: agent/agentUi
 
@@ -206,6 +206,8 @@ jobs:
         working-directory: agent/agentUi
         env:
           CI: "true"
+
+      - run: git status
 
       - uses: goreleaser/goreleaser-action@v6
         with:
