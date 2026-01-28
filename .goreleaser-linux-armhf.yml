@@ -56,10 +56,7 @@ nfpms:
     bindir: /usr/bin
 
     # Contents to add to the package.
-    contents:
-      - src: /opt/openziti/bin/zrok2
-        dst: /usr/bin/zrok2
-        type: "symlink"
+    contents: []
 
   - package_name: zrok2-controller
     id: zrok-controller
