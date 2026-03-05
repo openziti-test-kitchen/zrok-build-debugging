@@ -15,7 +15,7 @@ Both approaches run the agent as a long-lived container. Once the agent is runni
 ## Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) with Compose v2
-- A zrok account token (from `zrok2 admin create account` on a self-hosted instance, or from the zrok console on a hosted instance)
+- A zrok account token
 
 ## Bind-Mount Approach
 
@@ -23,23 +23,21 @@ This approach mirrors the [Linux systemd agent service](../agent/linux-service.m
 
 ### 1. Enable the Environment on the Host
 
-If you haven't already, install `zrok2` and enable your account:
+If you haven't already, [install `zrok2`](../install/index.mdx) and enable your account:
 
 ```bash
 zrok2 enable <your_account_token>
 ```
 
-This creates `~/.zrok2/environment.json`. Verify with:
+Verify with:
 
 ```bash
-ls ~/.zrok2/environment.json
+zrok2 status
 ```
 
 ### 2. Start the Agent Container
 
-Create a `compose.yml`:
-
-```yaml
+```yaml title="compose.yml"
 services:
   zrok-agent:
     image: docker.io/openziti/zrok2
@@ -56,7 +54,12 @@ services:
       - zrok2
       - agent
       - start
-      - --verbose
+      - --console-address
+      - 0.0.0.0
+    expose:
+      - 8888  # agent web console
+    # ports:
+    #   - 8888:8888  # uncomment to publish the agent console on the host
     volumes:
       - ${HOME}/.zrok2:/mnt/.zrok2
 ```
@@ -127,9 +130,7 @@ This approach uses Docker named volumes and init containers to manage the zrok e
 
 The `zrok2-enable` script included in the container image will enable the environment if the `ZROK2_ENABLE_TOKEN` variable is set, and does nothing if the environment is already enabled.
 
-### compose.yml
-
-```yaml
+```yaml title="compose.yml"
 services:
   # Set ownership on the named volume so the zrok2 user (UID 2171) can use it.
   zrok-init:
@@ -171,7 +172,14 @@ services:
       - zrok2
       - agent
       - start
-      - --verbose
+      - --console-address
+      - 0.0.0.0
+      - --console-start-port
+      - "${ZROK2_AGENT_CONSOLE_PORT:-8888}"
+    expose:
+      - "${ZROK2_AGENT_CONSOLE_PORT:-8888}"
+    # ports:
+    #   - "${ZROK2_AGENT_CONSOLE_PORT:-8888}:${ZROK2_AGENT_CONSOLE_PORT:-8888}"
     volumes:
       - zrok_env:/mnt
 
@@ -186,6 +194,7 @@ Create a `.env` file next to `compose.yml`:
 ```bash
 ZROK2_ENABLE_TOKEN=<your_account_token>
 # ZROK2_API_ENDPOINT=https://zrok.example.com  # uncomment for self-hosted
+# ZROK2_AGENT_CONSOLE_PORT=8888                # agent web console port
 ```
 
 ### Start and Use
