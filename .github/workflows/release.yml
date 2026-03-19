@@ -171,6 +171,17 @@ jobs:
   build-darwin:
     if: github.repository_owner == 'openziti' || vars.ZROK_SKIP_MACOS_BUILD == 'false'
     runs-on: macos-14
+    env:
+      # Pin Xcode 15.4 so CGO picks up the macOS 14.5 SDK. The runner's
+      # default Xcode can change between image releases; Xcode >= 16 ships
+      # SDK headers that removed deprecated SecTrustSettings symbols used by
+      # the transitive dependency google/certificate-transparency-go.
+      #
+      # DEVELOPER_DIR alone is not sufficient — Go's CGO invokes clang from
+      # CommandLineTools which resolves its own SDK path. SDKROOT forces the
+      # compiler to use the Xcode 15.4 SDK regardless.
+      DEVELOPER_DIR: /Applications/Xcode_15.4.app/Contents/Developer
+      SDKROOT: /Applications/Xcode_15.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk
     steps:
       - name: import distribution cert
         uses: apple-actions/import-codesign-certs@v3
