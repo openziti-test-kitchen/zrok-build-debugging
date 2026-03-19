@@ -1,22 +1,29 @@
 version: 2
 builds:
-  - id: zrok-amd64
-    main: ./cmd/zrok2
-    binary: zrok2
-    ldflags: "-s -w -X github.com/openziti/zrok/v2/build.Version={{.Tag}} -X github.com/openziti/zrok/v2/build.Hash={{.ShortCommit}}"
-    env:
-      - CGO_ENABLED=1
-    goos:
-      - darwin
-    goarch:
-      - amd64
-    hooks:
-      post:
-        - cmd: 'codesign -s "Developer ID Application: NetFoundry Inc" -v dist/zrok-amd64_darwin_amd64_v1/zrok2 --options=runtime'
-          output: true
-        - cmd: zip "dist/zrok-amd64_darwin_amd64_v1/zrok2.zip" dist/zrok-amd64_darwin_amd64_v1/zrok2
-        - cmd: xcrun notarytool submit "dist/zrok-amd64_darwin_amd64_v1/zrok2.zip" --apple-id {{ .Env.AC_USERNAME }} --password {{ .Env.AC_PASSWORD }} --team-id MN5S649TXM --wait
-          output: true
+  # amd64 darwin build disabled: the transitive dependency
+  # google/certificate-transparency-go contains a forked x509
+  # root_cgo_darwin.go (build constraint: cgo && !arm64) that uses
+  # deprecated SecTrustSettings symbols removed from recent macOS SDKs.
+  # The arm64 build is unaffected because it uses a different code path.
+  # Re-enable when ct-go updates or the dep chain drops ct-go/x509.
+  #
+  # - id: zrok-amd64
+  #   main: ./cmd/zrok2
+  #   binary: zrok2
+  #   ldflags: "-s -w -X github.com/openziti/zrok/v2/build.Version={{.Tag}} -X github.com/openziti/zrok/v2/build.Hash={{.ShortCommit}}"
+  #   env:
+  #     - CGO_ENABLED=1
+  #   goos:
+  #     - darwin
+  #   goarch:
+  #     - amd64
+  #   hooks:
+  #     post:
+  #       - cmd: 'codesign -s "Developer ID Application: NetFoundry Inc" -v dist/zrok-amd64_darwin_amd64_v1/zrok2 --options=runtime'
+  #         output: true
+  #       - cmd: zip "dist/zrok-amd64_darwin_amd64_v1/zrok2.zip" dist/zrok-amd64_darwin_amd64_v1/zrok2
+  #       - cmd: xcrun notarytool submit "dist/zrok-amd64_darwin_amd64_v1/zrok2.zip" --apple-id {{ .Env.AC_USERNAME }} --password {{ .Env.AC_PASSWORD }} --team-id MN5S649TXM --wait
+  #         output: true
 
   - id: zrok-arm64
     main: ./cmd/zrok2

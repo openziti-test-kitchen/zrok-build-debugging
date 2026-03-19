@@ -28,13 +28,14 @@ The binary lands in `dist/zrok2_linux_amd64_v1/zrok2`.
 
 ### macOS (Darwin)
 
-The transitive dependency `google/certificate-transparency-go` contains CGO
-code that uses deprecated macOS Security framework symbols removed in Xcode 16+
-SDKs. Pin the Xcode 15.4 SDK before building:
+The Darwin goreleaser config currently builds **arm64 only**. The amd64 target
+is disabled because the transitive dependency
+`google/certificate-transparency-go` contains CGO code
+(`x509/root_cgo_darwin.go`, constraint: `cgo && !arm64`) that uses deprecated
+macOS Security framework symbols removed from recent Xcode SDKs. The arm64
+build uses a different code path and is unaffected.
 
 ```bash
-export DEVELOPER_DIR=/Applications/Xcode_15.4.app/Contents/Developer
-export SDKROOT=/Applications/Xcode_15.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk
 goreleaser build --snapshot --clean -f .goreleaser-darwin.yml
 ```
 
