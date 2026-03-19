@@ -26,6 +26,17 @@ goreleaser build --snapshot --clean -f .goreleaser-linux-amd64.yml
 
 The binary lands in `dist/zrok2_linux_amd64_v1/zrok2`.
 
+### macOS (Darwin)
+
+The transitive dependency `google/certificate-transparency-go` contains CGO
+code that uses deprecated macOS Security framework symbols removed in Xcode 16+
+SDKs. Pin Xcode 15.4 before building:
+
+```bash
+export DEVELOPER_DIR=/Applications/Xcode_15.4.app/Contents/Developer
+goreleaser build --snapshot --clean -f .goreleaser-darwin.yml
+```
+
 ## Build with Docker
 
 For Docker-based builds — including `bin/build.bash`, the `openziti/zrok2`
